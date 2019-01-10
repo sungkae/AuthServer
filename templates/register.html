@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Auth Server Tutorial</title>
+    <h2>Register Page</h2>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+    <h2> Sign Up </h2>
+    <form id="form">
+        <div class = "inputs">
+            <label>아이디</label>
+            <input type="text" name = "input-id" id="userid" placeholder="put your ID here">
+        </div>
+        <div class = "inputs">
+            <label>패스워드</label>
+            <input type="password" name = "input-pwd" id = "userpwd" placeholder="password">
+        </div>
+        <input type="button" id="submit" name="submit" value="SignUp"/>
+    </form>
+    <article></article>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='src/sha256hash.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='src/sha256.js')}}"></script>
+    <script type = "text/javascript">
+        var salt = (Math.random()*0xFFFFFF<<0).toString(32);
+        // var pwd = SHA256($('#userpwd').val()+salt).toString()
+        var sha = Sha256.hash($('#userpwd')+salt);
+
+
+
+
+        $(document).ready(function(){
+            $("#submit").click(function(){
+                $.ajax({
+                    url:'/register',
+                    type: "POST",
+                    dataType: 'json',
+                    // contentType을 application/json으로 정하면 string으로 보내야돼!
+                    // 아니면 json 타입으로 그냥 보내기 오류나면 noneType으로 못받음
+                    // data: {
+                    //     "user_id":$('#userid').val(),
+                    //     "user_pwd":$('#userpwd').val()
+                    // }
+                    data: JSON.stringify({
+                       user_id: $('#userid').val(),
+                       user_pwd: Sha256.hash($('#userpwd').val()+salt),
+                        user_salt: salt,
+                        user_pww: $('#userpwd').val()+salt
+                    }),
+                    success : function(result){
+                        console.log("success");
+                        // document.querySelector('article').innerHTML
+                    },
+                    error: function(xhr,resp,text){
+                        console.log(xhr,resp,text);
+                    },
+                    contentType:"application/json"
+                })
+            });
+        });
+    </script>
+</body>
+</html>
